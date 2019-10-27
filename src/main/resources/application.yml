@@ -1,0 +1,8 @@
+spring:
+  servlet:
+    multipart:
+      max-request-size: 128MB
+      max-file-size: 128MB
+      enabled: false
+storage:
+  location: F:/mass/mass
