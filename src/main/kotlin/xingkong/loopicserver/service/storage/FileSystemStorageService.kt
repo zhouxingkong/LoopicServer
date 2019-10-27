@@ -112,7 +112,7 @@ constructor(properties: StorageProperties) : StorageService {
     }
 
     override fun load(subDir: String, filename: String): Path {
-        val currentPath = Paths.get(rootLocationString + subDir)
+        val currentPath = Paths.get(subDir)
         return currentPath.resolve(filename)
     }
 

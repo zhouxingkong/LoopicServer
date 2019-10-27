@@ -244,6 +244,101 @@ class ConfigFileManager {
 
     }
 
+    /**
+     * 系统初始化，用于服务端访问
+     */
+    fun systemInit(dir: String) {
+        val name = "$dir/loo.csv"
+        //        ArrayList<String> arrayList = new ArrayList<>();
+        try {
+            val fr = FileReader(name)
+            val bf = BufferedReader(fr)
+            var str: String?
+            /*第一行:读取源文件路径*/
+            str = bf.readLine()
+            if (str != null) {
+                str = str.replace(",".toRegex(), "")
+                val fileList = ArrayList<TagedFile>()
+                val srcDir: String = str.trim().replace("\\", "/")
+                println("源文件:$srcDir")
+                totalList = PicNameFilter.getFileList(fileList, "F:/mass/tag_dir")  //获取总共的文件列表
+                println("源文件个数:" + totalList.size)
+            }
+            /*第二行:目标文件路径*/
+            str = bf.readLine()
+            if (str != null) {
+                targetDir = str.replace(",".toRegex(), "")
+                println("目标文件:$targetDir")
+                val picDir = File("$targetDir/imgs")
+                if (!picDir.exists()) {
+                    picDir.mkdirs()
+                }
+            }
+
+            /*第三行:读取排除文件路径*/
+            str = bf.readLine()
+            if (str != null && str != null) {
+                exceptDir = str.replace(",".toRegex(), "")
+                loadExceptTags(exceptDir)
+            }
+
+            bf.close()
+            fr.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+
+    }
+
+    fun pickOne(tag: String): String {
+        var key = tag
+        var tags = key.split(DIV.toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+        if (tags.size < 1) return "#"
+
+        var filteredList: List<TagedFile>? = null
+        val indexs: IntArray
+        var fr: FilterResult? = null
+        var storagedNum = 0
+        while (filteredList == null || filteredList.size < 1) {
+            storagedNum = resultStorage.searchResultNum(key)   //搜索缓存
+            if (storagedNum >= 1) {
+                fr = resultStorage.get(key)
+                break
+            } else {
+                /**/
+                filteredList = picFilter.filter(totalList, tags, excludeTags, 1)    //过滤
+                /**/
+                val fileNum = filteredList!!.size
+                if (fileNum < 1 && tags.size > 1) {
+                    key = key.substring(0, key.lastIndexOf(DIV))
+                    tags = key.split(DIV.toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                } else {
+                    indexs = genRandomList(fileNum)
+                    fr = FilterResult(filteredList, indexs)
+                    resultStorage.put(key, fr)  //缓存结果
+                    break
+                }
+
+            }
+            //todo ：shuffle
+        }
+
+        val filelist = fr!!.filteredList
+        val numLimit = fr!!.res
+        var offset = fr!!.consumeIndex
+
+        var f = filelist[offset]   //由于已经进行了随机数shuffle操作，所以不需要用随机数索引
+        var fromPath = f.absolutePath
+        val fileName = f.name
+        //todo:防止图片重复
+        if (fr!!.res > 0) {
+            fr.consumeIndex = fr.consumeIndex + 1
+        }
+
+        return fromPath
+    }
+
+
     fun LooFromConfigFile(dir: String) {
 
         parseConfigFile(dir)

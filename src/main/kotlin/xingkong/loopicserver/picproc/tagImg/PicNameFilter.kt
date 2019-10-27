@@ -106,7 +106,7 @@ class PicNameFilter {
                     } else {
                         //                    String strFileName = files[i].getAbsolutePath();
                         //                    System.out.println("---" + strFileName);
-                        filelist.add(TagedFile(files[i]))
+                        filelist.add(TagedFile(files[i]))   //构造TagedFile时就加好了标签
                     }
                 }
 
