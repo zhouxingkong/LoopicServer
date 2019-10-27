@@ -15,6 +15,7 @@ class ConfigFileManager {
 
     internal lateinit var totalList: List<TagedFile>
     internal lateinit var excludeTags: MutableList<String>
+    internal var tagOrder: MutableList<String> = mutableListOf()
 
     init {
         picFilter = PicNameFilter()
@@ -244,6 +245,33 @@ class ConfigFileManager {
 
     }
 
+    fun buildTagOrder(rawTag: String) {
+        val nameSplitSpace = rawTag.split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()    //空格分开不同的部分
+        if (nameSplitSpace.size < 2) return
+        val picNum = 1   //总共图片数量
+
+        val outputDesc = OutputDesc()
+
+        /*配图*/
+        val picKey = nameSplitSpace[0]     //storage的键
+        tagOrder.add(picKey);
+        outputDesc.setPicFileName(picKey)
+
+        /*配音频*/
+        if (nameSplitSpace.size > 2) {
+            val soundTag = nameSplitSpace[1]
+            val soundMode = nameSplitSpace[2]
+            outputDesc.setSoundTag(soundTag)
+            outputDesc.setSoundMode(soundMode)
+        }
+
+        /*配文字*/
+        if (nameSplitSpace.size > 3) {
+            val text = nameSplitSpace[3]
+            outputDesc.setText(text)
+        }
+    }
+
     /**
      * 系统初始化，用于服务端访问
      */
@@ -282,12 +310,30 @@ class ConfigFileManager {
                 loadExceptTags(exceptDir)
             }
 
+            // 按行读取字符串
+            str = bf.readLine()
+            while (str != null && str.length > 0) {
+                if (str.endsWith(",")) {
+                    str = str.substring(0, str.length - 1)
+                }
+                buildTagOrder(str)
+                str = bf.readLine()
+            }
+
             bf.close()
             fr.close()
         } catch (e: IOException) {
             e.printStackTrace()
         }
 
+    }
+
+    fun pickOneWithServerConfig(index: Int): String {
+        var index = index
+        if (index >= tagOrder.size) {
+            index = 0
+        }
+        return pickOne(tagOrder[index])
     }
 
     fun pickOne(tag: String): String {

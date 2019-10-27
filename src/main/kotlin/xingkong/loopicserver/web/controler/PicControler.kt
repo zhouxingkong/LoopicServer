@@ -10,6 +10,8 @@ import org.springframework.http.server.reactive.ServerHttpResponse
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.ResponseBody
 import reactor.core.publisher.Mono
 import xingkong.loopicserver.picproc.tagImg.ConfigFileManager
 import xingkong.loopicserver.service.storage.StorageService
@@ -35,9 +37,9 @@ class PicControler : ApplicationRunner {
     }
 
     @GetMapping(value = ["/loopic/{cmd}/{num}/{pictag}"])
-    fun hello(request: ServerHttpRequest, response: ServerHttpResponse,
-              @PathVariable(value = "cmd") cmd: String,
-              @PathVariable(value = "num") num: String, @PathVariable(value = "pictag") tag: String): Mono<Void> {
+    fun getPic(request: ServerHttpRequest, response: ServerHttpResponse,
+               @PathVariable(value = "cmd") cmd: String,
+               @PathVariable(value = "num") num: String, @PathVariable(value = "pictag") tag: String): Mono<Void> {
         println("$num,$tag")
 
         if ("change".equals(cmd)) {  //更换图片
@@ -61,6 +63,41 @@ class PicControler : ApplicationRunner {
         response.getHeaders().contentType = MediaType.IMAGE_JPEG
         val file = resource.getFile()
         return zeroCopyResponse.writeWith(file, 0, file.length())
+    }
+
+    @GetMapping(value = ["/loopicserver/{cmd}/{num}"])
+    fun getPicWithServerConfig(request: ServerHttpRequest, response: ServerHttpResponse,
+                               @PathVariable(value = "cmd") cmd: String,
+                               @PathVariable(value = "num") num: String): Mono<Void> {
+        if ("change".equals(cmd)) {  //更换图片
+            tagMap.remove(num);
+        }
+        if (!tagMap.containsKey(num)) {    //已经获取过了
+            var path = configFileManager.pickOneWithServerConfig(num.toInt())
+            tagMap[num] = path
+        }
+        val filePath = tagMap.get(num);
+        println(filePath)
+
+        //加载文件resource
+        val index = filePath!!.lastIndexOf("\\")
+        val dir = filePath.substring(0, index)
+        val filename = filePath.substring(index + 1)
+        val resource = storageService!!.loadAsResource(dir, filename)
+
+        val zeroCopyResponse = response as ZeroCopyHttpOutputMessage
+        //response.getHeaders().set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=$filename")
+        response.getHeaders().contentType = MediaType.IMAGE_JPEG
+        val file = resource.getFile()
+        return zeroCopyResponse.writeWith(file, 0, file.length())
+    }
+
+    @PostMapping(value = ["/changepic/{num}"])
+    @ResponseBody
+    fun changePic(request: ServerHttpRequest, response: ServerHttpResponse,
+                  @PathVariable(value = "num") num: String): Mono<String> {
+        tagMap.remove(num);
+        return Mono.just("ok")
     }
 
 }
