@@ -20,15 +20,15 @@ public class MatchDirFirst extends MatchBase {
      */
     @Override
     public void computeMp(TagedFile tagedFile, List<String> inputTag) {
-        tagedFile.mp = 0;
+        tagedFile.setMp(0);
         /*加入随机事件，避免结果过于单调*/
         float rand = -LAMDA + new Random().nextFloat() * 2 * LAMDA;
-        for (String t : tagedFile.tags) {
-            tagedFile.mp *= 2;
+        for (String t : tagedFile.getTags()) {
+            tagedFile.setMp(tagedFile.getMp() * 2);
             if (!inputTag.contains(t)) {
-                tagedFile.mp += 1.0;
+                tagedFile.setMp(tagedFile.getMp() + 1.0);
             }
         }
-        tagedFile.mp += rand;   //使用随机数来shuffle
+        tagedFile.setMp(tagedFile.getMp() + rand);   //使用随机数来shuffle
     }
 }

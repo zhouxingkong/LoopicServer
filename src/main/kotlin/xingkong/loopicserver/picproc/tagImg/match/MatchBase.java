@@ -18,7 +18,7 @@ public class MatchBase {
     public void computeMp(TagedFile tagedFile, List<String> inputTag) {
         /*默认方法，使用完全随机数*/
         float rand = new Random().nextFloat();
-        tagedFile.mp = rand;   //使用随机数来shuffle
+        tagedFile.setMp(rand);   //使用随机数来shuffle
     }
 
 }

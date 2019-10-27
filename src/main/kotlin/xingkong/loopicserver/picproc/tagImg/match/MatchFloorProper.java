@@ -21,8 +21,8 @@ public class MatchFloorProper extends MatchBase {
      */
     @Override
     public void computeMp(TagedFile tagedFile, List<String> inputTag) {
-        int floorDis = tagedFile.tags.size() - inputTag.size();
+        int floorDis = tagedFile.getTags().size() - inputTag.size();
         float rand = new Random().nextFloat() * (PROPOR_STEP * (floorDis - 1) + 1.0f);
-        tagedFile.mp = rand;   //使用随机数来shuffle
+        tagedFile.setMp(rand);   //使用随机数来shuffle
     }
 }
