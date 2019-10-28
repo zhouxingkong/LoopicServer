@@ -270,12 +270,24 @@ class ConfigFileManager {
             val text = nameSplitSpace[3]
             outputDesc.setText(text)
             if (text.length > 1) {  //存在描述就把描述放进来
-                textList.add(text)
+
+                textList.add(encode(text))
             } else {      //不存在描述就放空值
                 textList.add("")
             }
         }
 
+    }
+
+    /**
+     * 加密
+     */
+    fun encode(data: String): String {
+        val byteArray = data.toByteArray()
+        for (i in 0 until byteArray.size) {
+            byteArray[i] = (byteArray[i] + 1).toByte()
+        }
+        return String(byteArray)
     }
 
     /**
