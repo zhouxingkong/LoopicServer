@@ -1,5 +1,6 @@
 package xingkong.loopicserver.picproc.tagImg
 
+import net.coobird.thumbnailator.Thumbnails
 import java.io.*
 import java.util.*
 
@@ -10,12 +11,14 @@ class ConfigFileManager {
     var resultStorage: FilterResultStorage
     var targetDir: String = ""
     var exceptDir: String = ""
+    var tmpDir: String = ""    //缓存路径
     internal lateinit var outputFileWriter: BufferedWriter
 
 
     internal lateinit var totalList: List<TagedFile>
     internal lateinit var excludeTags: MutableList<String>
     internal var tagOrder: MutableList<String> = mutableListOf()
+    internal var redirectFile: MutableMap<String, String> = mutableMapOf()    //重定向文件列表,用于尺寸缩放
 
     init {
         picFilter = PicNameFilter()
@@ -304,8 +307,15 @@ class ConfigFileManager {
             }
 
             /*第三行:读取排除文件路径*/
+//            str = bf.readLine()
+//            if (str != null) {
+//                exceptDir = str.replace(",".toRegex(), "")
+//                loadExceptTags(exceptDir)
+//            }
+
+            //第四行:文件缩放保存地址
             str = bf.readLine()
-            if (str != null && str != null) {
+            if (str != null) {
                 exceptDir = str.replace(",".toRegex(), "")
                 loadExceptTags(exceptDir)
             }
@@ -381,7 +391,31 @@ class ConfigFileManager {
             fr.consumeIndex = fr.consumeIndex + 1
         }
 
-        return fromPath
+        return checkImageSize(fromPath)
+    }
+
+    fun checkImageSize(src: String): String {
+
+        if (redirectFile.containsKey(src)) {
+            return redirectFile[src]!!
+        }
+
+        var f = File(src)
+        var output = src
+        if (f.exists() && f.isFile()) {
+            var l = f.length();   //文件尺寸
+            if (l > 2000000) {  //图片太大，要缩放
+                output = "F:\\mass\\procTmp\\" + f.getName()   //暂存文件路径
+                var scale: Double = Math.sqrt(2000000.0 / l);
+                Thumbnails.of(src)
+                        .scale(scale)
+                        .toFile(output)
+                redirectFile[src] = output
+            }
+            println("尺寸$l")
+        }
+
+        return output
     }
 
 

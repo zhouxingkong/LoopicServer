@@ -97,6 +97,7 @@ class PicControler : ApplicationRunner {
     fun changePic(request: ServerHttpRequest, response: ServerHttpResponse,
                   @PathVariable(value = "num") num: String): Mono<String> {
         tagMap.remove(num);
+        println("换图$num")
         return Mono.just("ok")
     }
 
