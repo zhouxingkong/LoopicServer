@@ -14,7 +14,7 @@ class ConfigFileManager {
     var tmpDir: String = ""    //缓存路径
     internal lateinit var outputFileWriter: BufferedWriter
 
-
+    internal var textList: MutableList<String> = mutableListOf()
     internal lateinit var totalList: List<TagedFile>
     internal lateinit var excludeTags: MutableList<String>
     internal var tagOrder: MutableList<String> = mutableListOf()
@@ -182,9 +182,6 @@ class ConfigFileManager {
                 }
 
             }
-
-            //todo ：shuffle
-
         }
 
         /*拷贝文件*/
@@ -207,7 +204,7 @@ class ConfigFileManager {
                 val fileList = ArrayList<TagedFile>()
                 val srcDir: String = str.trim().replace("\\", "/")
                 println("源文件:$srcDir")
-                totalList = PicNameFilter.getFileList(fileList, "F:/mass/tag_dir")  //获取总共的文件列表
+                totalList = PicNameFilter.getFileList(fileList, "D:/mass/tag_dir")  //获取总共的文件列表
                 println("源文件个数:" + totalList.size)
             }
             /*第二行:目标文件路径*/
@@ -272,7 +269,13 @@ class ConfigFileManager {
         if (nameSplitSpace.size > 3) {
             val text = nameSplitSpace[3]
             outputDesc.setText(text)
+            if (text.length > 1) {  //存在描述就把描述放进来
+                textList.add(text)
+            } else {      //不存在描述就放空值
+                textList.add("")
+            }
         }
+
     }
 
     /**
@@ -292,7 +295,7 @@ class ConfigFileManager {
                 val fileList = ArrayList<TagedFile>()
                 val srcDir: String = str.trim().replace("\\", "/")
                 println("源文件:$srcDir")
-                totalList = PicNameFilter.getFileList(fileList, "F:/mass/tag_dir")  //获取总共的文件列表
+                totalList = PicNameFilter.getFileList(fileList, "D:/mass/tag_dir")  //获取总共的文件列表
                 println("源文件个数:" + totalList.size)
             }
             /*第二行:目标文件路径*/
@@ -307,18 +310,18 @@ class ConfigFileManager {
             }
 
             /*第三行:读取排除文件路径*/
-//            str = bf.readLine()
-//            if (str != null) {
-//                exceptDir = str.replace(",".toRegex(), "")
-//                loadExceptTags(exceptDir)
-//            }
-
-            //第四行:文件缩放保存地址
             str = bf.readLine()
             if (str != null) {
                 exceptDir = str.replace(",".toRegex(), "")
                 loadExceptTags(exceptDir)
             }
+
+            //第四行:文件缩放保存地址
+//            str = bf.readLine()
+//            if (str != null) {
+//                exceptDir = str.replace(",".toRegex(), "")
+//                loadExceptTags(exceptDir)
+//            }
 
             // 按行读取字符串
             str = bf.readLine()
@@ -405,17 +408,23 @@ class ConfigFileManager {
         if (f.exists() && f.isFile()) {
             var l = f.length();   //文件尺寸
             if (l > 2000000) {  //图片太大，要缩放
-                output = "F:\\mass\\procTmp\\" + f.getName()   //暂存文件路径
-                var scale: Double = Math.sqrt(2000000.0 / l);
+                output = "D:\\mass\\procTmp\\" + f.getName()   //暂存文件路径
+                val start = System.currentTimeMillis()
+                var scale: Double = Math.sqrt(2000000.0 / l)
                 Thumbnails.of(src)
                         .scale(scale)
                         .toFile(output)
+                val consume = System.currentTimeMillis() - start
+                println("图片尺寸 $l 缩放耗时 $consume ms")
                 redirectFile[src] = output
             }
-            println("尺寸$l")
         }
 
         return output
+    }
+
+    fun getTextList(): MutableList<String> {
+        return textList
     }
 
 

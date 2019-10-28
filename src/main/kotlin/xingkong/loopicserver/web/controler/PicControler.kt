@@ -33,7 +33,7 @@ class PicControler : ApplicationRunner {
      * @throws Exception on error
      */
     override fun run(args: ApplicationArguments?) {
-        configFileManager.systemInit("F:/mass/config/test")
+        configFileManager.systemInit("D:/mass/config/test")
     }
 
     @GetMapping(value = ["/loopic/{cmd}/{num}/{pictag}"])
@@ -73,7 +73,7 @@ class PicControler : ApplicationRunner {
             tagMap.remove(num);
         }
         if (!tagMap.containsKey(num)) {    //已经获取过了
-            var path = configFileManager.pickOneWithServerConfig(num.toInt())
+            val path = configFileManager.pickOneWithServerConfig(num.toInt())
             tagMap[num] = path
         }
         val filePath = tagMap.get(num);
@@ -88,16 +88,33 @@ class PicControler : ApplicationRunner {
         val zeroCopyResponse = response as ZeroCopyHttpOutputMessage
         //response.getHeaders().set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=$filename")
         response.getHeaders().contentType = MediaType.IMAGE_JPEG
-        val file = resource.getFile()
+        val file = resource.file
         return zeroCopyResponse.writeWith(file, 0, file.length())
+    }
+
+    @GetMapping(value = ["/text/xingkong1313113"])
+    @ResponseBody
+    fun getText(): Mono<MutableList<String>> {
+        println("获取文本")
+        return Mono.just(configFileManager.getTextList())
     }
 
     @PostMapping(value = ["/changepic/{num}"])
     @ResponseBody
-    fun changePic(request: ServerHttpRequest, response: ServerHttpResponse,
-                  @PathVariable(value = "num") num: String): Mono<String> {
+    fun changePic(@PathVariable(value = "num") num: String): Mono<String> {
         tagMap.remove(num);
         println("换图$num")
+        return Mono.just("ok")
+    }
+
+    /**
+     * 清空服务端所有缓存
+     */
+    @PostMapping(value = ["/erasecache"])
+    @ResponseBody
+    fun eraseCache(): Mono<String> {
+        tagMap.clear()
+        println("清空缓存")
         return Mono.just("ok")
     }
 

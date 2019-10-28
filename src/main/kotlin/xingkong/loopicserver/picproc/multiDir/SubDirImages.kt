@@ -50,7 +50,6 @@ class SubDirImages {
                 val inStream = FileInputStream(oldPath) //读入原文件
                 val fs = FileOutputStream(newPath)
                 val buffer = ByteArray(1444)
-                val length: Int
                 byteread = inStream.read(buffer)
                 while (byteread != -1) {
                     bytesum += byteread //字节数 文件大小

@@ -5,4 +5,4 @@ spring:
       max-file-size: 128MB
       enabled: false
 storage:
-  location: F:/mass/mass
+  location: D:/mass/mass
