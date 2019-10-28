@@ -33,7 +33,7 @@ class PicControler : ApplicationRunner {
      * @throws Exception on error
      */
     override fun run(args: ApplicationArguments?) {
-        configFileManager.systemInit("D:/mass/config/test")
+        configFileManager.systemInit("D:/mass/config/use")
     }
 
     @GetMapping(value = ["/loopic/{cmd}/{num}/{pictag}"])
