@@ -15,6 +15,7 @@ class ConfigFileManager {
     internal lateinit var outputFileWriter: BufferedWriter
 
     internal var textList: MutableList<String> = mutableListOf()
+    internal var tagList: MutableList<String> = mutableListOf()
     internal lateinit var totalList: List<TagedFile>
     internal lateinit var excludeTags: MutableList<String>
     internal var tagOrder: MutableList<String> = mutableListOf()
@@ -246,12 +247,15 @@ class ConfigFileManager {
     }
 
     fun buildTagOrder(rawTag: String) {
+        if (rawTag.startsWith("#")) { //忽略注释
+            return
+        }
         val nameSplitSpace = rawTag.split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()    //空格分开不同的部分
         if (nameSplitSpace.size < 2) return
         val picNum = 1   //总共图片数量
 
         val outputDesc = OutputDesc()
-
+        tagList.add(encodeBase64(nameSplitSpace[0]))
         /*配图*/
         val picKey = nameSplitSpace[0]     //storage的键
         tagOrder.add(picKey);
@@ -271,7 +275,7 @@ class ConfigFileManager {
             outputDesc.setText(text)
             if (text.length > 1) {  //存在描述就把描述放进来
 
-                textList.add(encode(text))
+                textList.add(encodeBase64(text))
             } else {      //不存在描述就放空值
                 textList.add("")
             }
@@ -283,11 +287,15 @@ class ConfigFileManager {
      * 加密
      */
     fun encode(data: String): String {
-        val byteArray = data.toByteArray()
+        val byteArray = data.toByteArray(Charsets.UTF_8)
         for (i in 0 until byteArray.size) {
             byteArray[i] = (byteArray[i] + 1).toByte()
         }
         return String(byteArray)
+    }
+
+    fun encodeBase64(data: String): String {
+        return String(Base64.getEncoder().encode(data.toByteArray()))
     }
 
     /**
@@ -419,10 +427,10 @@ class ConfigFileManager {
         var output = src
         if (f.exists() && f.isFile()) {
             var l = f.length();   //文件尺寸
-            if (l > 2000000) {  //图片太大，要缩放
+            if (l > 1000000) {  //图片太大，要缩放
                 output = "D:\\mass\\procTmp\\" + f.getName()   //暂存文件路径
                 val start = System.currentTimeMillis()
-                var scale: Double = Math.sqrt(2000000.0 / l)
+                var scale: Double = Math.sqrt(1000000.0 / l)
                 Thumbnails.of(src)
                         .scale(scale)
                         .toFile(output)
@@ -437,6 +445,10 @@ class ConfigFileManager {
 
     fun getTextList(): MutableList<String> {
         return textList
+    }
+
+    fun getChapterList(): MutableList<String> {
+        return tagList
     }
 
 

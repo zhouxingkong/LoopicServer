@@ -65,7 +65,7 @@ class PicControler : ApplicationRunner {
         return zeroCopyResponse.writeWith(file, 0, file.length())
     }
 
-    @GetMapping(value = ["/loopicserver/{cmd}/{num}"])
+    @GetMapping(value = ["/loopicserver/{cmd}/{num}", "/loopicserver/{cmd}/{num}/{ser}"])
     fun getPicWithServerConfig(request: ServerHttpRequest, response: ServerHttpResponse,
                                @PathVariable(value = "cmd") cmd: String,
                                @PathVariable(value = "num") num: String): Mono<Void> {
@@ -97,6 +97,13 @@ class PicControler : ApplicationRunner {
     fun getText(): Mono<MutableList<String>> {
         println("获取文本")
         return Mono.just(configFileManager.getTextList())
+    }
+
+    @GetMapping(value = ["/text/chapterList"])
+    @ResponseBody
+    fun getChapterList(): Mono<MutableList<String>> {
+        println("获取文本")
+        return Mono.just(configFileManager.getChapterList())
     }
 
     @PostMapping(value = ["/changepic/{num}"])
