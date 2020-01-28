@@ -27,6 +27,8 @@ class ConfigFileManager {
         resultStorage = FilterResultStorage()
     }
 
+    internal val isEncoded = false
+
     fun initOutputFile(path: String) {
         try {
             val writeName = File(path) // 相对路径，如果没有则要建立一个新的output.txt文件
@@ -187,7 +189,7 @@ class ConfigFileManager {
 
         /*拷贝文件*/
         val dstName = imageCpy.copyRandImage(fr!!, "$targetDir/imgs", picNum)
-        println("tag=" + key + "resultNum = " + fr.filteredList.size)
+//        println("tag=" + key + "resultNum = " + fr.filteredList.size)
         return dstName
     }
 
@@ -234,7 +236,7 @@ class ConfigFileManager {
                 if (str.endsWith(",")) {
                     str = str.substring(0, str.length - 1)
                 }
-                println(str)
+//                println(str)
                 parseOneLine(str)
                 str = bf.readLine()
             }
@@ -247,7 +249,9 @@ class ConfigFileManager {
     }
 
     fun buildTagOrder(rawTag: String) {
-        if (rawTag.startsWith("#")) { //忽略注释
+        var rawTag = rawTag.trim().trimStart()
+
+        if (rawTag.startsWith("#") || rawTag.length < 1) { //忽略注释
             return
         }
         val nameSplitSpace = rawTag.split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()    //空格分开不同的部分
@@ -258,7 +262,9 @@ class ConfigFileManager {
         tagList.add(encodeBase64(nameSplitSpace[0]))
         /*配图*/
         val picKey = nameSplitSpace[0]     //storage的键
-        tagOrder.add(picKey);
+        //todo:检查标签合法性
+
+        tagOrder.add(picKey)
         outputDesc.setPicFileName(picKey)
 
         /*配音频*/
@@ -283,18 +289,8 @@ class ConfigFileManager {
 
     }
 
-    /**
-     * 加密
-     */
-    fun encode(data: String): String {
-        val byteArray = data.toByteArray(Charsets.UTF_8)
-        for (i in 0 until byteArray.size) {
-            byteArray[i] = (byteArray[i] + 1).toByte()
-        }
-        return String(byteArray)
-    }
-
     fun encodeBase64(data: String): String {
+        if (!isEncoded) return data
         return String(Base64.getEncoder().encode(data.toByteArray()))
     }
 
@@ -345,7 +341,17 @@ class ConfigFileManager {
 
             // 按行读取字符串
             str = bf.readLine()
-            while (str != null && str.length > 0) {
+            while (str != null) {
+
+                if (str.length < 1) continue
+
+                if (str.startsWith("include:")) {
+                    str = str.replace(",", "")
+                    str = str.replace("include:", "")
+                    parseSubTagFile(dir + "/sub/" + str + ".csv")
+                    continue;
+                }
+
                 if (str.endsWith(",")) {
                     str = str.substring(0, str.length - 1)
                 }
@@ -359,6 +365,36 @@ class ConfigFileManager {
             e.printStackTrace()
         }
 
+    }
+
+    fun parseSubTagFile(name: String) {
+        try {
+            val fr = FileReader(name)
+            val bf = BufferedReader(fr)
+            var str: String?
+
+            // 按行读取字符串
+            str = bf.readLine()
+            while (str != null && str.length > 0) {
+
+//                if(str.startsWith("include:")){
+//                    str=str.replace(",","")
+//                    str=str.replace("include:","")
+//                    parseSubTagFile(dir+"/sub/"+str+".csv")
+//                    continue;
+//                }
+                if (str.endsWith(",")) {
+                    str = str.substring(0, str.length - 1)
+                }
+                buildTagOrder(str)
+                str = bf.readLine()
+            }
+
+            bf.close()
+            fr.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
     }
 
     fun pickOneWithServerConfig(index: Int): String {
@@ -406,6 +442,7 @@ class ConfigFileManager {
         val numLimit = fr!!.res
         var offset = fr!!.consumeIndex
 
+        if (offset >= filelist.size) return "error:$tag"
         var f = filelist[offset]   //由于已经进行了随机数shuffle操作，所以不需要用随机数索引
         var fromPath = f.absolutePath
         val fileName = f.name
@@ -435,7 +472,7 @@ class ConfigFileManager {
                         .scale(scale)
                         .toFile(output)
                 val consume = System.currentTimeMillis() - start
-                println("图片尺寸 $l 缩放耗时 $consume ms")
+//                println("图片尺寸 $l 缩放耗时 $consume ms")
                 redirectFile[src] = output
             }
         }

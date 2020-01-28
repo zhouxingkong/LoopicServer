@@ -87,7 +87,7 @@ class SingleDirRename {
             if (!ret) {
                 println("Error!!$path   ->    $outputDir")
             } else {
-                println("success!!$path   ->    $outputDir")
+//                println("success!!$path   ->    $outputDir")
             }
 
             img_index++

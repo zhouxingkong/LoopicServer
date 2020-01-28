@@ -19,7 +19,6 @@ import xingkong.loopicserver.service.storage.StorageService
 @Controller
 class PicControler : ApplicationRunner {
 
-
     @Autowired
     internal var storageService: StorageService? = null
 
@@ -39,18 +38,22 @@ class PicControler : ApplicationRunner {
     @GetMapping(value = ["/loopic/{cmd}/{num}/{pictag}"])
     fun getPic(request: ServerHttpRequest, response: ServerHttpResponse,
                @PathVariable(value = "cmd") cmd: String,
-               @PathVariable(value = "num") num: String, @PathVariable(value = "pictag") tag: String): Mono<Void> {
-        println("$num,$tag")
+               @PathVariable(value = "num") num: String, @PathVariable(value = "pictag") tag: String): Mono<Void>? {
+//        println("$num,$tag")
 
         if ("change".equals(cmd)) {  //更换图片
             tagMap.remove(num);
         }
         if (!tagMap.containsKey(num)) {    //已经获取过了
-            var path = configFileManager.pickOne(tag)
+            val path = configFileManager.pickOne(tag)
+            if (path.startsWith("error")) {
+                println(path)
+                return null
+            }
             tagMap[num] = path
         }
         val filePath = tagMap.get(num);
-        println(filePath)
+//        println(filePath)
 
         //加载文件resource
         val index = filePath!!.lastIndexOf("\\")
@@ -68,16 +71,20 @@ class PicControler : ApplicationRunner {
     @GetMapping(value = ["/loopicserver/{cmd}/{num}", "/loopicserver/{cmd}/{num}/{ser}"])
     fun getPicWithServerConfig(request: ServerHttpRequest, response: ServerHttpResponse,
                                @PathVariable(value = "cmd") cmd: String,
-                               @PathVariable(value = "num") num: String): Mono<Void> {
+                               @PathVariable(value = "num") num: String): Mono<Void>? {
         if ("change".equals(cmd)) {  //更换图片
             tagMap.remove(num);
         }
         if (!tagMap.containsKey(num)) {    //已经获取过了
             val path = configFileManager.pickOneWithServerConfig(num.toInt())
+            if (path.startsWith("error")) {
+                println(path)
+                return null
+            }
             tagMap[num] = path
         }
         val filePath = tagMap.get(num);
-        println(filePath)
+//        println(filePath)
 
         //加载文件resource
         val index = filePath!!.lastIndexOf("\\")
@@ -95,14 +102,14 @@ class PicControler : ApplicationRunner {
     @GetMapping(value = ["/text/xingkong1313113"])
     @ResponseBody
     fun getText(): Mono<MutableList<String>> {
-        println("获取文本")
+//        println("获取文本")
         return Mono.just(configFileManager.getTextList())
     }
 
     @GetMapping(value = ["/text/chapterList"])
     @ResponseBody
     fun getChapterList(): Mono<MutableList<String>> {
-        println("获取文本")
+//        println("获取目录")
         return Mono.just(configFileManager.getChapterList())
     }
 
@@ -110,7 +117,7 @@ class PicControler : ApplicationRunner {
     @ResponseBody
     fun changePic(@PathVariable(value = "num") num: String): Mono<String> {
         tagMap.remove(num);
-        println("换图$num")
+//        println("换图$num")
         return Mono.just("ok")
     }
 
@@ -121,7 +128,7 @@ class PicControler : ApplicationRunner {
     @ResponseBody
     fun eraseCache(): Mono<String> {
         tagMap.clear()
-        println("清空缓存")
+//        println("清空缓存")
         return Mono.just("ok")
     }
 
