@@ -23,7 +23,10 @@ object ConfigFileManager {
 
     fun getPic(storyId:Int,sceneId:Int,ser:Int):String{
         val picList = storys.getOrNull(storyId)?.sceneList?.getOrNull(sceneId)?.picPath
-        return picList?.get(ser)?:"error"
+        return picList?.let{
+            val index = ser % it.size
+            it[index]
+        }?:"error"
     }
 
     fun getStoryList():List<String>{
