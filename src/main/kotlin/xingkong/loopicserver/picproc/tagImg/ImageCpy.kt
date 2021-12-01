@@ -1,5 +1,8 @@
 package xingkong.loopicserver.picproc.tagImg
 
+import xingkong.loopicserver.module.bean.TagedFile
+import xingkong.loopicserver.module.utils.FileUtil
+import xingkong.loopicserver.module.utils.FileUtil.getNameRoot
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -88,7 +91,7 @@ class ImageCpy {
             while (numbers.length < 6) {
                 numbers = "0$numbers"
             }
-            suf = getSuffix(f.name)
+            suf = FileUtil.getSuffix(f.name)
             toFileName = "$letters$numbers.$suf"
             toPath = "$toDir/$toFileName"
             copyFile(fromPath, toPath)
@@ -101,24 +104,4 @@ class ImageCpy {
         return toFileName
     }
 
-    companion object {
-
-        //后缀
-        fun getSuffix(filename: String): String {
-            val dix = filename.lastIndexOf('.')
-            return if (dix < 0) {
-                ""
-            } else {
-                filename.substring(dix + 1)
-            }
-        }
-
-        fun getNameRoot(l: Int): String {
-            var str = ""
-            for (i in 0 until l) {
-                str = str + (Math.random() * 26 + 'a'.toDouble()).toChar()
-            }
-            return str
-        }
-    }
 }

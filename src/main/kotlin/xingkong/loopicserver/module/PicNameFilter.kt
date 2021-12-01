@@ -1,9 +1,9 @@
-package xingkong.loopicserver.picproc.tagImg
+package xingkong.loopicserver.module
 
 
-import xingkong.loopicserver.picproc.tagImg.match.MatchBase
-import xingkong.loopicserver.picproc.tagImg.match.MatchFloorProperSubnorm
-import java.io.File
+import xingkong.loopicserver.module.bean.TagedFile
+import xingkong.loopicserver.module.match.MatchBase
+import xingkong.loopicserver.module.match.MatchFloorProperSubnorm
 import java.util.*
 import java.util.stream.Collectors
 
@@ -14,9 +14,9 @@ class PicNameFilter {
      */
     internal var matchBase: MatchBase = MatchFloorProperSubnorm()
 
-    fun filter(inputList: List<TagedFile>, tags: Array<String>, excludeTag: List<String>, num: Int): List<TagedFile> {
+    fun filter(inputList: List<TagedFile>, tags: List<String>, excludeTag: List<String>): List<TagedFile> {
         var result: List<TagedFile>? = null
-        val inputTag = ArrayList(Arrays.asList(*tags))
+        val inputTag = tags
         while (result == null) {
             result = inputList.stream()
                     .filter { f: TagedFile -> judgeCandidate(f, inputTag, excludeTag) }    //step1: 找出所有全部包含目标标签组的文件集合
@@ -92,54 +92,5 @@ class PicNameFilter {
         return true
     }
 
-    companion object {
-
-        fun getFileList(filelist: MutableList<TagedFile>, strPath: String): List<TagedFile> {
-
-            val dir = File(strPath)
-            val files = dir.listFiles() // 该文件目录下文件全部放入数组
-            if (files != null) {
-                for (i in files.indices) {
-                    //                String fileName = files[i].getName();
-                    if (files[i].isDirectory) { // 判断是文件还是文件夹
-                        getFileList(filelist, files[i].absolutePath) // 获取文件绝对路径
-                    } else {
-                        //                    String strFileName = files[i].getAbsolutePath();
-                        //                    System.out.println("---" + strFileName);
-                        filelist.add(TagedFile(files[i]))   //构造TagedFile时就加好了标签
-                    }
-                }
-
-            }
-            return filelist
-        }
-    }
-
-    //    public boolean judgeCandidate(TagedFile f, List<String> inputTag) {
-    //        for (String t : inputTag) {
-    //            /**/
-    //            String[] subTags = t.split("\\|");
-    //            boolean output = false; //当前这条tag是否满足
-    //            for (String sub : subTags) {
-    //                boolean stat = true;
-    //
-    //                if (sub.startsWith("!")) {
-    //                    stat = false;
-    //                    sub = sub.substring(1);
-    //                }
-    //                if (stat ^ (!f.tags.contains(sub))) {
-    //                    output = true;
-    //                    break;
-    //                }
-    //
-    //            }
-    //
-    //            if (!output) {
-    //                return false;
-    //            }
-    //
-    //        }
-    //        return true;
-    //    }
 
 }

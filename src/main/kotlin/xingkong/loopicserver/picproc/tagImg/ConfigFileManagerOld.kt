@@ -1,11 +1,15 @@
 package xingkong.loopicserver.picproc.tagImg
 
-import net.coobird.thumbnailator.Thumbnails
+import xingkong.loopicserver.module.PicNameFilter
+import xingkong.loopicserver.module.bean.TagedFile
+import xingkong.loopicserver.module.utils.FileUtil
+import xingkong.loopicserver.module.utils.ListUtil
+import xingkong.loopicserver.module.utils.TagUtil
 import java.io.*
 import java.util.*
 
 /*管理配置文件*/
-class ConfigFileManager {
+class ConfigFileManagerOld {
     var picFilter: PicNameFilter
     var imageCpy: ImageCpy
     var resultStorage: FilterResultStorage
@@ -29,19 +33,19 @@ class ConfigFileManager {
 
     internal val isEncoded = false
 
-    fun initOutputFile(path: String) {
-        try {
-            val writeName = File(path) // 相对路径，如果没有则要建立一个新的output.txt文件
-            writeName.createNewFile() // 创建新文件,有同名的文件的话直接覆盖
-
-            val writer = FileWriter(writeName)
-            outputFileWriter = BufferedWriter(writer)
-
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-
-    }
+//    fun initOutputFile(path: String) {
+//        try {
+//            val writeName = File(path) // 相对路径，如果没有则要建立一个新的output.txt文件
+//            writeName.createNewFile() // 创建新文件,有同名的文件的话直接覆盖
+//
+//            val writer = FileWriter(writeName)
+//            outputFileWriter = BufferedWriter(writer)
+//
+//        } catch (e: IOException) {
+//            e.printStackTrace()
+//        }
+//
+//    }
 
 
     fun writeOutputLine(outputDesc: OutputDesc) {
@@ -53,39 +57,6 @@ class ConfigFileManager {
             e.printStackTrace()
         }
 
-    }
-
-    /**
-     * 生成随机列表
-     *
-     * @param file_num
-     * @return
-     */
-    fun genRandomList(file_num: Int): IntArray {
-        if (file_num < 2) {
-            return intArrayOf(0)
-        }
-        val indexs = IntArray(file_num)
-        for (j in 0 until file_num) {
-            indexs[j] = j    //给索引数组赋值
-        }
-        val random = Random()
-        for (j in 0 until file_num) {
-            val temp = indexs[j]
-            val newindx = random.nextInt(file_num - 1)
-            indexs[j] = indexs[newindx]  //交换位置
-            indexs[newindx] = temp
-        }
-
-        return indexs
-    }
-
-    fun makeKey(tags: Array<String>): String {
-        var out = tags[0]
-        for (i in 1 until tags.size) {
-            out = out + DIV + tags[i]
-        }
-        return out
     }
 
     /**
@@ -124,7 +95,8 @@ class ConfigFileManager {
         val picKey = nameSplitSpace[0]     //storage的键
         var picName: String? = "#"
         if (picKey != "#") {
-            picName = processPicture(picKey, picNum)
+//            picName = processPicture(picKey, picNum)
+            picName = ""
         }
         if (picName == null || picName.length < 1) {
             picName = "#"
@@ -155,98 +127,43 @@ class ConfigFileManager {
      * @param key
      * @param picNum
      */
-    fun processPicture(key: String, picNum: Int): String {
-        var key = key
-        var tags = key.split(DIV.toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-        if (tags.size < 1) return "#"
-
-        var filteredList: List<TagedFile>? = null
-        val indexs: IntArray
-        var fr: FilterResult? = null
-        var storagedNum = 0
-        while (filteredList == null || filteredList.size < picNum) {
-            storagedNum = resultStorage.searchResultNum(key)   //搜索缓存
-            if (storagedNum >= picNum) {
-                fr = resultStorage.get(key)
-                break
-            } else {
-                /**/
-                filteredList = picFilter.filter(totalList, tags, excludeTags, picNum)    //过滤
-                /**/
-                val fileNum = filteredList!!.size
-                if (fileNum < picNum && tags.size > 1) {
-                    key = key.substring(0, key.lastIndexOf(DIV))
-                    tags = key.split(DIV.toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-                } else {
-                    indexs = genRandomList(fileNum)
-                    fr = FilterResult(filteredList, indexs)
-                    resultStorage.put(key, fr)  //缓存结果
-                    break
-                }
-
-            }
-        }
-
-        /*拷贝文件*/
-        val dstName = imageCpy.copyRandImage(fr!!, "$targetDir/imgs", picNum)
-//        println("tag=" + key + "resultNum = " + fr.filteredList.size)
-        return dstName
-    }
-
-    fun parseConfigFile(dir: String) {
-        val name = "$dir/loo.csv"
-        //        ArrayList<String> arrayList = new ArrayList<>();
-        try {
-            val fr = FileReader(name)
-            val bf = BufferedReader(fr)
-            var str: String?
-            /*第一行:读取源文件路径*/
-            str = bf.readLine()
-            if (str != null) {
-                str = str.replace(",".toRegex(), "")
-                val fileList = ArrayList<TagedFile>()
-                val srcDir: String = str.trim().replace("\\", "/")
-                println("源文件:$srcDir")
-                totalList = PicNameFilter.getFileList(fileList, "D:/mass/tag_dir")  //获取总共的文件列表
-                println("源文件个数:" + totalList.size)
-            }
-            /*第二行:目标文件路径*/
-            str = bf.readLine()
-            if (str != null) {
-                targetDir = str.replace(",".toRegex(), "")
-                println("目标文件:$targetDir")
-                val picDir = File("$targetDir/imgs")
-                if (!picDir.exists()) {
-                    picDir.mkdirs()
-                }
-            }
-
-            /*第三行:读取排除文件路径*/
-            str = bf.readLine()
-            if (str != null && str != null) {
-                exceptDir = str.replace(",".toRegex(), "")
-                loadExceptTags(exceptDir)
-            }
-
-            initOutputFile("$targetDir/index.txt")
-
-            // 按行读取字符串
-            str = bf.readLine()
-            while (str != null && str.length > 0) {
-                if (str.endsWith(",")) {
-                    str = str.substring(0, str.length - 1)
-                }
-//                println(str)
-                parseOneLine(str)
-                str = bf.readLine()
-            }
-            bf.close()
-            fr.close()
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-
-    }
+//    fun processPicture(key: String, picNum: Int): String {
+//        var key = key
+//        var tags = key.split(DIV.toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+//        if (tags.size < 1) return "#"
+//
+//        var filteredList: List<TagedFile>? = null
+//        val indexs: IntArray
+//        var fr: FilterResult? = null
+//        var storagedNum = 0
+//        while (filteredList == null || filteredList.size < picNum) {
+//            storagedNum = resultStorage.searchResultNum(key)   //搜索缓存
+//            if (storagedNum >= picNum) {
+//                fr = resultStorage.get(key)
+//                break
+//            } else {
+//                /**/
+//                filteredList = picFilter.filter(totalList, tags, excludeTags, picNum)    //过滤
+//                /**/
+//                val fileNum = filteredList!!.size
+//                if (fileNum < picNum && tags.size > 1) {
+//                    key = key.substring(0, key.lastIndexOf(DIV))
+//                    tags = key.split(DIV.toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+//                } else {
+//                    indexs = ListUtil.genRandomList(fileNum)
+//                    fr = FilterResult(filteredList, indexs)
+//                    resultStorage.put(key, fr)  //缓存结果
+//                    break
+//                }
+//
+//            }
+//        }
+//
+//        /*拷贝文件*/
+//        val dstName = imageCpy.copyRandImage(fr!!, "$targetDir/imgs", picNum)
+////        println("tag=" + key + "resultNum = " + fr.filteredList.size)
+//        return dstName
+//    }
 
     fun buildTagOrder(rawTag: String) {
         var rawTag = rawTag.trim().trimStart()
@@ -311,7 +228,7 @@ class ConfigFileManager {
                 val fileList = ArrayList<TagedFile>()
                 val srcDir: String = str.trim().replace("\\", "/")
                 println("源文件:$srcDir")
-                totalList = PicNameFilter.getFileList(fileList, "D:/mass/tag_dir")  //获取总共的文件列表
+                totalList = FileUtil.getFileList(fileList, "/Users/xingkong/loo/tag_dir")  //获取总共的文件列表
                 println("源文件个数:" + totalList.size)
             }
             /*第二行:目标文件路径*/
@@ -407,7 +324,7 @@ class ConfigFileManager {
 
     fun pickOne(tag: String): String {
         var key = tag
-        var tags = key.split(DIV.toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+        var tags = TagUtil.splitTag(key)
         if (tags.size < 1) return "#"
 
         var filteredList: List<TagedFile>? = null
@@ -421,14 +338,14 @@ class ConfigFileManager {
                 break
             } else {
                 /**/
-                filteredList = picFilter.filter(totalList, tags, excludeTags, 1)    //过滤
+                filteredList = picFilter.filter(totalList, tags, excludeTags)    //过滤
                 /**/
                 val fileNum = filteredList!!.size
                 if (fileNum < 1 && tags.size > 1) {
                     key = key.substring(0, key.lastIndexOf(DIV))
-                    tags = key.split(DIV.toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                    tags = key.split(DIV.toRegex()).dropLastWhile { it.isEmpty() }
                 } else {
-                    indexs = genRandomList(fileNum)
+                    indexs = ListUtil.genRandomList(fileNum)
                     fr = FilterResult(filteredList, indexs)
                     resultStorage.put(key, fr)  //缓存结果
                     break
@@ -451,33 +368,7 @@ class ConfigFileManager {
             fr.consumeIndex = fr.consumeIndex + 1
         }
 
-        return checkImageSize(fromPath)
-    }
-
-    fun checkImageSize(src: String): String {
-
-        if (redirectFile.containsKey(src)) {
-            return redirectFile[src]!!
-        }
-
-        var f = File(src)
-        var output = src
-        if (f.exists() && f.isFile()) {
-            var l = f.length();   //文件尺寸
-            if (l > 1000000) {  //图片太大，要缩放
-                output = "D:\\mass\\procTmp\\" + f.getName()   //暂存文件路径
-                val start = System.currentTimeMillis()
-                var scale: Double = Math.sqrt(1000000.0 / l)
-                Thumbnails.of(src)
-                        .scale(scale)
-                        .toFile(output)
-                val consume = System.currentTimeMillis() - start
-//                println("图片尺寸 $l 缩放耗时 $consume ms")
-                redirectFile[src] = output
-            }
-        }
-
-        return output
+        return fromPath
     }
 
     fun getTextList(): MutableList<String> {
@@ -491,7 +382,7 @@ class ConfigFileManager {
 
     fun LooFromConfigFile(dir: String) {
 
-        parseConfigFile(dir)
+//        parseConfigFile(dir)
     }
 
     companion object {

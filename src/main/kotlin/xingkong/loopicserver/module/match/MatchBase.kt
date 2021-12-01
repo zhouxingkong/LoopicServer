@@ -1,7 +1,7 @@
-package xingkong.loopicserver.picproc.tagImg.match
+package xingkong.loopicserver.module.match
 
 
-import xingkong.loopicserver.picproc.tagImg.TagedFile
+import xingkong.loopicserver.module.bean.TagedFile
 import java.util.*
 
 
