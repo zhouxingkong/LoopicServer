@@ -4,6 +4,7 @@ package xingkong.loopicserver.module
 import xingkong.loopicserver.module.bean.TagedFile
 import xingkong.loopicserver.module.match.MatchBase
 import xingkong.loopicserver.module.match.MatchFloorProperSubnorm
+import xingkong.loopicserver.module.match.MatchTable
 import java.util.*
 import java.util.stream.Collectors
 
@@ -12,7 +13,7 @@ class PicNameFilter {
     /**
      * 引入策略模式，将不同标签匹配策略封装到子类中
      */
-    internal var matchBase: MatchBase = MatchFloorProperSubnorm()
+    internal var matchBase: MatchBase = MatchTable()
 
 
     fun filter(inputList: List<TagedFile>,

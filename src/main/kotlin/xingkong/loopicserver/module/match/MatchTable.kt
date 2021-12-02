@@ -4,14 +4,13 @@ import xingkong.loopicserver.module.bean.TagedFile
 import java.util.*
 
 class MatchTable  : MatchBase() {
+    val matchTable = listOf(100,110,120,130,140,145,150,155,160,165,170)
 
-    val matchTable = listOf(0,1,1,2,3,4)
     override fun computeMp(tagedFile: TagedFile, inputTag: List<String>) {
-        val rand = Random().nextDouble()
+        var floorDis = tagedFile.tags.size - inputTag.size
+        floorDis = if(floorDis<0) 0 else floorDis
+        val factor = if(floorDis>=matchTable.size) matchTable[matchTable.size-1] else matchTable[floorDis]
+        val rand = Random().nextDouble() * factor
         tagedFile.mp = rand   //使用随机数来shuffle
-    }
-
-    companion object {
-        val LAMDA = 4.0f
     }
 }
