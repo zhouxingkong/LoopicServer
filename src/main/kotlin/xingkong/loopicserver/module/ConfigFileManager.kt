@@ -1,5 +1,8 @@
 package xingkong.loopicserver.module
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import xingkong.loopicserver.module.bean.SceneInfo
 import xingkong.loopicserver.module.bean.StoryInfo
 import xingkong.loopicserver.module.bean.TagedFile
@@ -105,9 +108,11 @@ object ConfigFileManager {
         if(file.exists()){
             storys.clear()
             file.listFiles()
-                    .filter { it.isFile }.mapIndexed { index, file ->
+                .filter { it.isFile }.mapIndexed { index, file ->
+                    GlobalScope.launch(Dispatchers.IO) {
                         makeStoryInfo(index,file)
-                    }.toList()
+                    }
+                }
         }
     }
 

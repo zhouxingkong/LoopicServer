@@ -24,6 +24,7 @@ dependencies {
 
     implementation("net.coobird:thumbnailator:0.4.8")
 
+    implementation ("io.reactivex.rxjava2:rxjava:2.2.21")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
