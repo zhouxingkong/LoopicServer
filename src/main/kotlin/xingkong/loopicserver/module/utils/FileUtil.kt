@@ -11,14 +11,15 @@ object FileUtil {
         if (files != null) {
             for (i in files.indices) {
                 if (files[i].isDirectory) { // 判断是文件还是文件夹
-                    tag.add(files[i].name)
+                    val newTags = files[i].name.split("-")
+                    tag.addAll(newTags)
                     getFileList(filelist, files[i].absolutePath,tag) // 获取文件绝对路径
+                    if(tag.isNotEmpty()) tag.removeAll(newTags)
                 } else {
                     filelist.add(TagedFile(files[i],tag))   //构造TagedFile时就加好了标签
                 }
             }
         }
-        if(tag.isNotEmpty()) tag.removeAt(tag.size-1)
         return filelist
     }
 

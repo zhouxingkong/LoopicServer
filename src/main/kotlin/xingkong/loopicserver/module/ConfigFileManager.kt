@@ -55,7 +55,7 @@ object ConfigFileManager {
                 val fileList = ArrayList<TagedFile>()
                 val srcDir: String = str.trim().replace("\\", "/")
                 println("源文件:$srcDir")
-                totalList = FileUtil.getFileList(fileList, "/Users/xingkong/loo/tag_dir")  //获取总共的文件列表
+                totalList = FileUtil.getFileList(fileList, "E:/mass/tag_dir")  //获取总共的文件列表
                 println("源文件个数:" + totalList.size)
             }
 
@@ -108,6 +108,7 @@ object ConfigFileManager {
     }
 
     fun makeStoryInfo(index:Int,f:File){
+        println("start makeStoryInfo")
         val storyInfo = StoryInfo().apply {
             id = index
             rootPath = f.absolutePath
@@ -125,7 +126,8 @@ object ConfigFileManager {
                 if (str.startsWith("include:")) {
                     str = str.replace(",", "")
                     str = str.replace("include:", "")
-                    parseSubTagFile(storyInfo,f.absolutePath + "/sub/" + str + ".csv")
+                    parseSubTagFile(storyInfo,f.parentFile.absolutePath + "/sub/" + str + ".csv")
+                    str = bf.readLine()
                     continue;
                 }
 
@@ -138,6 +140,7 @@ object ConfigFileManager {
 
             storys.add(storyInfo)
 
+            println("end makeStoryInfo")
             bf.close()
             fr.close()
         } catch (e: IOException) {
@@ -176,6 +179,7 @@ object ConfigFileManager {
     }
 
     private fun buildTagOrder(storyInfo:StoryInfo,rawTag: String) {
+        println("buildTagOrder=${rawTag}")
         val rawTag = rawTag.trim().trimStart()
         if (rawTag.startsWith("#") || rawTag.isEmpty()) { //忽略注释
             return

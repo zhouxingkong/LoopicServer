@@ -31,7 +31,7 @@ class PicControler : ApplicationRunner {
      * @throws Exception on error
      */
     override fun run(args: ApplicationArguments?) {
-        ConfigFileManager.systemInit("/Users/xingkong/loo/config/use")
+        ConfigFileManager.systemInit("D:/mass/config")
     }
 
 
