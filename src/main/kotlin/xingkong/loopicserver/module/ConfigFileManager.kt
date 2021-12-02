@@ -41,6 +41,10 @@ object ConfigFileManager {
         return storys.getOrNull(storyId)?.sceneList?.map { it.text } ?: listOf<String>()
     }
 
+    fun getAllTextList():List<List<String>>{
+        return storys.map { it.sceneList.map { it.text } }
+    }
+
 
     fun systemInit(dir: String) {
         val name = "$dir/index.csv"
