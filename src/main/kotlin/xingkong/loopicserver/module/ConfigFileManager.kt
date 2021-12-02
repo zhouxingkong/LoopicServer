@@ -188,11 +188,11 @@ object ConfigFileManager {
     }
 
     private fun buildTagOrder(storyInfo:StoryInfo,rawTag: String) {
-        println("buildTagOrder=${rawTag}")
         val rawTag = rawTag.trim().trimStart()
         if (rawTag.startsWith("#") || rawTag.isEmpty()) { //忽略注释
             return
         }
+        println("buildTagOrder=${rawTag}")
         val nameSplitSpace = rawTag.split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()    //空格分开不同的部分
         if (nameSplitSpace.size < 2) return
         val sceneInfo = SceneInfo()
@@ -214,12 +214,6 @@ object ConfigFileManager {
         if (nameSplitSpace.size > 3) {
             val text = nameSplitSpace[3]
             sceneInfo.text = text
-//            outputDesc.setText(text)
-//            if (text.length > 1) {  //存在描述就把描述放进来
-//                textList.add(text)
-//            } else {      //不存在描述就放空值
-//                textList.add("")
-//            }
         }
 
         storyInfo.sceneList.add(sceneInfo)
@@ -241,12 +235,10 @@ object ConfigFileManager {
 
         /*读取源文件路径*/
         str = bf.readLine()
-        while (str != null && str.length > 0) {
+        while (str != null && str.isNotEmpty() && !str.startsWith("[")) {
             excludeTags.add(str)
             str = bf.readLine()
         }
-
         println("排除配置个数:" + excludeTags.size)
-
     }
 }

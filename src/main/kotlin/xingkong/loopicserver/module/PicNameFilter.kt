@@ -51,15 +51,15 @@ class PicNameFilter {
         }
     }
 
-    var judgeExcludeList = mutableListOf<String>()
-    var judgeMatchList = mutableListOf<String>()
-    var judgeNotMatchList = mutableListOf<String>()
     fun judgeCandidate(f: TagedFile,
                        inputTag: List<String>,
                        excludeTag: List<String>): Boolean {
+        var judgeExcludeList = mutableListOf<String>()
+        var judgeMatchList = mutableListOf<String>()
+        var judgeNotMatchList = mutableListOf<String>()
         //判断exclude标签
         judgeExcludeList.let{
-            it.clear()
+//            it.clear()
             it.addAll(f.tags)
             it.retainAll(excludeTag)
             it.removeAll(inputTag)
@@ -68,7 +68,7 @@ class PicNameFilter {
 
         //判断匹配标签
         judgeMatchList.let{
-            it.clear()
+//            it.clear()
             it.addAll(inputTag)
             it.removeAll(f.tags)
             if(it.isNotEmpty()) return false
@@ -76,56 +76,13 @@ class PicNameFilter {
 
         //判断非标签
         judgeNotMatchList.let{
-            it.clear()
+//            it.clear()
             it.addAll(f.tags)
             val notTags = inputTag.filter { it.startsWith("!") }.map { it.substring(1) }
             it.retainAll(notTags)
             if(it.isNotEmpty()) return false
         }
 
-
-//        f.tags.retainAll(excludeTag)
-//        /*step1:排除标签*/
-//        for (ext in excludeTag) {
-//            val fileTagMach = f.tags.contains(ext)
-//            var inputTagMach = false
-//            for (`in` in inputTag) {
-//                if (`in`.contains(ext)) {
-//                    inputTagMach = true
-//                    break
-//                }
-//            }
-//            if (!inputTagMach && fileTagMach) {
-//                return false
-//            }
-//        }
-
-        /*step2: 验证标签*/
-//        for (curr in inputTag) {
-//            var t = curr
-//            var stat = true
-//            if (t.startsWith("!")) {
-//                stat = false
-//                t = t.substring(1)
-//            }
-//
-//            var output = !stat //当前这条tag是否满足
-//
-//            for (ft in f.tags) {
-//                if (tagMatch(ft,t)) {
-//                    if (stat) {
-//                        output = true
-//                        break
-//                    } else {
-//                        return false
-//                    }
-//                }
-//            }
-//
-//            if (!output) {
-//                return false
-//            }
-//        }
         return true
     }
 
