@@ -54,11 +54,9 @@ class PicNameFilter {
     fun judgeCandidate(f: TagedFile,
                        inputTag: List<String>,
                        excludeTag: List<String>): Boolean {
-        val judgeExcludeList = mutableListOf<String>()
-        val judgeMatchList = mutableListOf<String>()
-        val judgeNotMatchList = mutableListOf<String>()
+        val judgeList = mutableListOf<String>()
         //判断exclude标签
-        judgeExcludeList.let{
+        judgeList.let{
             it.addAll(f.tags)
             it.retainAll(excludeTag)
             it.removeAll(inputTag)
@@ -66,14 +64,16 @@ class PicNameFilter {
         }
 
         //判断匹配标签
-        judgeMatchList.let{
+        judgeList.let{
+            it.clear()
             it.addAll(inputTag)
             it.removeAll(f.tags)
             if(it.isNotEmpty()) return false
         }
 
         //判断非标签
-        judgeNotMatchList.let{
+        judgeList.let{
+            it.clear()
             it.addAll(f.tags)
             val notTags = inputTag.filter { it.startsWith("!") }.map { it.substring(1) }
             it.retainAll(notTags)
