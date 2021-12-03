@@ -149,7 +149,7 @@ object ConfigFileManager {
 
             storys.add(storyInfo)
 
-            println("end makeStoryInfo")
+            println("ready")
             bf.close()
             fr.close()
         } catch (e: IOException) {
@@ -192,7 +192,7 @@ object ConfigFileManager {
         if (rawTag.startsWith("#") || rawTag.isEmpty()) { //忽略注释
             return
         }
-        println("buildTagOrder=${rawTag}")
+        print(">")
         val nameSplitSpace = rawTag.split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()    //空格分开不同的部分
         if (nameSplitSpace.size < 2) return
         val sceneInfo = SceneInfo()
