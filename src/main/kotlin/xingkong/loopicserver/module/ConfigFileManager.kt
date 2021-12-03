@@ -52,7 +52,6 @@ object ConfigFileManager {
 
 
     fun systemInit(dir: String) {
-
         val name = "$dir/index.csv"
         try {
             val fr = FileReader(name)
@@ -121,7 +120,6 @@ object ConfigFileManager {
     }
 
     fun makeStoryInfo(index:Int,f:File){
-        println("start makeStoryInfo")
         val storyInfo = StoryInfo().apply {
             id = index
             rootPath = f.absolutePath
