@@ -7,11 +7,13 @@ import xingkong.loopicserver.module.bean.SceneInfo
 import xingkong.loopicserver.module.bean.StoryInfo
 import xingkong.loopicserver.module.bean.TagedFile
 import xingkong.loopicserver.module.utils.FileUtil
+import xingkong.loopicserver.module.utils.NetUtil
 import xingkong.loopicserver.module.utils.TagUtil
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
 import java.io.IOException
+import java.net.Inet4Address
 import java.util.ArrayList
 
 object ConfigFileManager {
@@ -50,6 +52,7 @@ object ConfigFileManager {
 
 
     fun systemInit(dir: String) {
+
         val name = "$dir/index.csv"
         try {
             val fr = FileReader(name)
@@ -91,6 +94,7 @@ object ConfigFileManager {
             }
             loadStoryList(storyListDir)
 
+            println("ip=${NetUtil.getIPAddress()}")
 
             bf.close()
             fr.close()
@@ -149,7 +153,7 @@ object ConfigFileManager {
 
             storys.add(storyInfo)
 
-            println("ready")
+            println("ready=${NetUtil.getIPAddress()}")
             bf.close()
             fr.close()
         } catch (e: IOException) {
