@@ -4,7 +4,7 @@ import java.io.File
 import java.util.*
 
 class TagedFile(var file: File,val inputTag:List<String>) {
-    var mp = 100.0     //匹配分，越小说明和目标标签越近
+//    var mp = 100.0     //匹配分，越小说明和目标标签越近
     var tags = mutableListOf<String>()
     val name: String
         get() = file.name

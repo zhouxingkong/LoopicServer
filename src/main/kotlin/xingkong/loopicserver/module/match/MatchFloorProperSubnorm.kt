@@ -12,7 +12,7 @@ class MatchFloorProperSubnorm : MatchBase() {
      * @param tagedFile
      * @param inputTag
      */
-    override fun computeMp(tagedFile: TagedFile, inputTag: List<String>) {
+    override fun computeMp(tagedFile: TagedFile, inputTag: List<String>):Double  {
         val inputTagSize = inputTag.size
         var tagDis = 1.0f
         for (i in tagedFile.tags.size - 1 downTo 1) {
@@ -27,7 +27,7 @@ class MatchFloorProperSubnorm : MatchBase() {
         }
 
         val rand = Random().nextDouble() * tagDis
-        tagedFile.mp = rand   //使用随机数来shuffle
+        return rand
     }
 
     companion object {

@@ -24,10 +24,10 @@ class PicNameFilter {
         while (result == null) {
             result = inputList.stream()
                     .filter { f: TagedFile -> judgeCandidate(f, tags, excludeTag) }    //step1: 找出所有全部包含目标标签组的文件集合
-                    .peek { tagedFile -> matchBase.computeMp(tagedFile, tags) } //step2:使用标签匹配算法来排序文件的优先级
-                    .sorted(Comparator.comparing<TagedFile, Double> { o -> o.mp })    //step3:将结果按照匹配分排序
+                    .map { tagedFile -> Pair(matchBase.computeMp(tagedFile, tags),tagedFile)  } //step2:使用标签匹配算法来排序文件的优先级
+                    .sorted(Comparator.comparing<Pair<Double,TagedFile>, Double> { it.first })    //step3:将结果按照匹配分排序
+                    .map { it.second }
                     .collect(Collectors.toList())
-            //result.sort(Comparator.comparing(o -> o.mp));
             /*打印结果*/
             //            printResult(result, inputTag);
         }
@@ -47,19 +47,18 @@ class PicNameFilter {
             for (s in t.tags) {
                 print("-$s")
             }
-            println(" ;mp=" + t.mp)
+//            println(" ;mp=" + t.mp)
         }
     }
 
     fun judgeCandidate(f: TagedFile,
                        inputTag: List<String>,
                        excludeTag: List<String>): Boolean {
-        var judgeExcludeList = mutableListOf<String>()
-        var judgeMatchList = mutableListOf<String>()
-        var judgeNotMatchList = mutableListOf<String>()
+        val judgeExcludeList = mutableListOf<String>()
+        val judgeMatchList = mutableListOf<String>()
+        val judgeNotMatchList = mutableListOf<String>()
         //判断exclude标签
         judgeExcludeList.let{
-//            it.clear()
             it.addAll(f.tags)
             it.retainAll(excludeTag)
             it.removeAll(inputTag)
@@ -68,7 +67,6 @@ class PicNameFilter {
 
         //判断匹配标签
         judgeMatchList.let{
-//            it.clear()
             it.addAll(inputTag)
             it.removeAll(f.tags)
             if(it.isNotEmpty()) return false
@@ -76,7 +74,6 @@ class PicNameFilter {
 
         //判断非标签
         judgeNotMatchList.let{
-//            it.clear()
             it.addAll(f.tags)
             val notTags = inputTag.filter { it.startsWith("!") }.map { it.substring(1) }
             it.retainAll(notTags)
@@ -85,11 +82,5 @@ class PicNameFilter {
 
         return true
     }
-
-    fun tagMatch(target:String,cond:String):Boolean{
-//        return target.matches(cond.toRegex())
-        return target == cond
-    }
-
 
 }

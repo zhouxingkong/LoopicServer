@@ -15,10 +15,10 @@ class MatchFloorProper : MatchBase() {
      * @param tagedFile
      * @param inputTag
      */
-    override fun computeMp(tagedFile: TagedFile, inputTag: List<String>) {
+    override fun computeMp(tagedFile: TagedFile, inputTag: List<String>):Double  {
         val floorDis = tagedFile.tags.size - inputTag.size
         val rand = Random().nextDouble() * (PROPOR_STEP * (floorDis - 1) + 1.0f)
-        tagedFile.mp = rand   //使用随机数来shuffle
+        return rand   //使用随机数来shuffle
     }
 
     companion object {
