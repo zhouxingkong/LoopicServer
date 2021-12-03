@@ -239,8 +239,8 @@ object ConfigFileManager {
 
         /*读取源文件路径*/
         str = bf.readLine()
-        while (str != null && str.isNotEmpty() && !str.startsWith("[")) {
-            excludeTags.add(str)
+        while (str != null && str.isNotEmpty()) {
+            if(!str.startsWith("[")) excludeTags.add(str)
             str = bf.readLine()
         }
         println("排除配置个数:" + excludeTags.size)
