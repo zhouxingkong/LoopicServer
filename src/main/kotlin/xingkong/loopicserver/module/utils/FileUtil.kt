@@ -1,7 +1,8 @@
 package xingkong.loopicserver.module.utils
 
+import xingkong.loopicserver.module.ConfigFileManager
 import xingkong.loopicserver.module.bean.TagedFile
-import java.io.File
+import java.io.*
 
 object FileUtil {
 
@@ -38,6 +39,30 @@ object FileUtil {
             str = str + (Math.random() * 26 + 'a'.toDouble()).toChar()
         }
         return str
+    }
+
+    fun readInput(f:File,inputReader:(reader: BufferedReader)->Unit){
+        try{
+            val fr = InputStreamReader(FileInputStream(f),"UTF-8")
+            val bf = BufferedReader(fr)
+            inputReader.invoke(bf)
+            bf.close()
+            fr.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
+    fun readInput(path:String,inputReader:(reader: BufferedReader)->Unit){
+        try{
+            val fr = InputStreamReader(FileInputStream(path),"UTF-8")
+            val bf = BufferedReader(fr)
+            inputReader.invoke(bf)
+            bf.close()
+            fr.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
     }
 
 

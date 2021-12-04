@@ -50,10 +50,8 @@ object ConfigFileManager {
 
     fun systemInit(dir: String) {
         val name = "$dir/index.csv"
-        try {
-            val fr = InputStreamReader(FileInputStream(name),"UTF-8")
-            fr.encoding
-            val bf = BufferedReader(fr)
+
+        FileUtil.readInput(name){ bf ->
             var str: String?
             /*第一行:读取源文件路径*/
             str = bf.readLine()
@@ -92,11 +90,6 @@ object ConfigFileManager {
             loadStoryList(storyListDir)
 
             println("ip=${NetUtil.getIPAddress()}")
-
-            bf.close()
-            fr.close()
-        } catch (e: IOException) {
-            e.printStackTrace()
         }
 
     }
@@ -122,11 +115,7 @@ object ConfigFileManager {
             id = index
             rootPath = f.absolutePath
         }
-        try{
-            val fr = InputStreamReader(FileInputStream(f),"UTF-8")
-            val bf = BufferedReader(fr)
-
-
+        FileUtil.readInput(f) { bf ->
             var str = bf.readLine()
             while (str != null) {
 
@@ -150,17 +139,11 @@ object ConfigFileManager {
             storys.add(storyInfo)
 
             println("ready=${NetUtil.getIPAddress()}")
-            bf.close()
-            fr.close()
-        } catch (e: IOException) {
-            e.printStackTrace()
         }
     }
 
     private fun parseSubTagFile(storyInfo:StoryInfo,name: String) {
-        try {
-            val fr = InputStreamReader(FileInputStream(name),"UTF-8")
-            val bf = BufferedReader(fr)
+        FileUtil.readInput(name) { bf ->
             var str: String?
 
             // 按行读取字符串
@@ -179,12 +162,8 @@ object ConfigFileManager {
                 buildTagOrder(storyInfo,str)
                 str = bf.readLine()
             }
-
-            bf.close()
-            fr.close()
-        } catch (e: IOException) {
-            e.printStackTrace()
         }
+
     }
 
     private fun buildTagOrder(storyInfo:StoryInfo,rawTag: String) {
@@ -228,17 +207,17 @@ object ConfigFileManager {
      */
     @Throws(IOException::class)
     fun loadExceptTags(dir: String) {
-        excludeTags = ArrayList()
-        val fr = FileReader(dir)
-        val bf = BufferedReader(fr)
-        var str: String?
+        FileUtil.readInput(dir){ bf ->
+            excludeTags = ArrayList()
+            var str: String?
 
-        /*读取源文件路径*/
-        str = bf.readLine()
-        while (str != null && str.isNotEmpty()) {
-            if(!str.startsWith("[")) excludeTags.add(str)
+            /*读取源文件路径*/
             str = bf.readLine()
+            while (str != null && str.isNotEmpty()) {
+                if(!str.startsWith("[")) excludeTags.add(str)
+                str = bf.readLine()
+            }
+            println("排除配置个数:" + excludeTags.size)
         }
-        println("排除配置个数:" + excludeTags.size)
     }
 }
