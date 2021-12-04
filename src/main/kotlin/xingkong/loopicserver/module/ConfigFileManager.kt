@@ -9,10 +9,7 @@ import xingkong.loopicserver.module.bean.TagedFile
 import xingkong.loopicserver.module.utils.FileUtil
 import xingkong.loopicserver.module.utils.NetUtil
 import xingkong.loopicserver.module.utils.TagUtil
-import java.io.BufferedReader
-import java.io.File
-import java.io.FileReader
-import java.io.IOException
+import java.io.*
 import java.net.Inet4Address
 import java.util.ArrayList
 
@@ -54,7 +51,8 @@ object ConfigFileManager {
     fun systemInit(dir: String) {
         val name = "$dir/index.csv"
         try {
-            val fr = FileReader(name)
+            val fr = InputStreamReader(FileInputStream(name),"UTF-8")
+            fr.encoding
             val bf = BufferedReader(fr)
             var str: String?
             /*第一行:读取源文件路径*/
@@ -125,7 +123,7 @@ object ConfigFileManager {
             rootPath = f.absolutePath
         }
         try{
-            val fr = FileReader(f)
+            val fr = InputStreamReader(FileInputStream(f),"UTF-8")
             val bf = BufferedReader(fr)
 
 
@@ -161,7 +159,7 @@ object ConfigFileManager {
 
     private fun parseSubTagFile(storyInfo:StoryInfo,name: String) {
         try {
-            val fr = FileReader(name)
+            val fr = InputStreamReader(FileInputStream(name),"UTF-8")
             val bf = BufferedReader(fr)
             var str: String?
 
