@@ -14,25 +14,25 @@ class PicNameFilter {
      * 引入策略模式，将不同标签匹配策略封装到子类中
      */
     internal var matchBase: MatchBase = MatchTable()
-
+    val filterCache = mutableMapOf<Set<String>,List<TagedFile>>()   //过滤缓存
 
     fun filter(inputList: List<TagedFile>,
                tags: List<String>,
                excludeTag: List<String>
     ): List<TagedFile> {
-        var result: List<TagedFile>? = null
-        while (result == null) {
-            result = inputList.stream()
-                    .filter { f: TagedFile -> judgeCandidate(f, tags, excludeTag) }    //step1: 找出所有全部包含目标标签组的文件集合
-                    .map { tagedFile -> Pair(matchBase.computeMp(tagedFile, tags),tagedFile)  } //step2:使用标签匹配算法来排序文件的优先级
-                    .sorted(Comparator.comparing<Pair<Double,TagedFile>, Double> { it.first })    //step3:将结果按照匹配分排序
-                    .map { it.second }
-                    .collect(Collectors.toList())
-            /*打印结果*/
-            //            printResult(result, inputTag);
+        val tagSet = tags.toSet()
+        val filterResult = if(filterCache.containsKey(tagSet)){
+            filterCache[tagSet]
+        } else{
+            val f = inputList.filter { f: TagedFile -> judgeCandidate(f, tags, excludeTag) }
+            filterCache[tagSet] = f
+            f
         }
-
-        return result
+        return filterResult!!.stream()    //step1: 找出所有全部包含目标标签组的文件集合
+                .map { tagedFile -> Pair(matchBase.computeMp(tagedFile, tags),tagedFile)  } //step2:使用标签匹配算法来排序文件的优先级
+                .sorted(Comparator.comparing<Pair<Double,TagedFile>, Double> { it.first })    //step3:将结果按照匹配分排序
+                .map { it.second }
+                .collect(Collectors.toList())
     }
 
 
