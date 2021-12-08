@@ -64,11 +64,28 @@ class PicNameFilter {
         }
 
         //判断匹配标签
-        judgeList.let{
-            it.clear()
-            it.addAll(inputTag)
-            it.removeAll(f.tags)
-            if(it.isNotEmpty()) return false
+        judgeList.let{ l->
+            l.clear()
+            l.addAll(inputTag)
+            val num = l.filter { !it.startsWith("!") }.map { it.split("|").toList()}
+                    .map {
+                        val lclone = mutableListOf<String>()
+                        lclone.addAll(it)
+                        val size = lclone.size
+                        when(size){
+                            0->{
+                                true
+                            }
+                            1->{
+                                f.tags.contains(lclone[0])
+                            }
+                            else->{
+                                lclone.removeAll(f.tags)
+                                lclone.size < size
+                            }
+                        }
+                    }.count { !it }
+            if(num > 0) return false
         }
 
         //判断非标签
