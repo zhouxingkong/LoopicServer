@@ -47,6 +47,11 @@ object ConfigFileManager {
         return storys.map { it.sceneList.map { it.text } }
     }
 
+    fun clear(){
+        storys.clear()
+        loadStoryList(storyListDir)
+    }
+
 
     fun systemInit(dir: String) {
         val name = "$dir/index.csv"

@@ -84,4 +84,12 @@ class PicControler : ApplicationRunner {
         return Mono.just(ConfigFileManager.getAllTextList())
     }
 
+    @PostMapping(value = ["/clearcache"])
+    @ResponseBody
+    fun clearCache(): Mono<String> {
+        ConfigFileManager.clear()
+        println("清空缓存")
+        return Mono.just("ok")
+    }
+
 }
