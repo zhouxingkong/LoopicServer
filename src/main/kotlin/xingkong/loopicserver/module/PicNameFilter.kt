@@ -56,9 +56,13 @@ class PicNameFilter {
                        excludeTag: List<String>): Boolean {
         val judgeList = mutableListOf<String>()
         //判断exclude标签
+        val excl = mutableListOf<String>()
+        excl.addAll(excludeTag)
+        excl.removeAll(inputTag.filter { it.startsWith("+") }.map { it.substring(1) })
+
         judgeList.let{
             it.addAll(f.tags)
-            it.retainAll(excludeTag)
+            it.retainAll(excl)
             it.removeAll(inputTag)
             if(it.isNotEmpty()) return false
         }
