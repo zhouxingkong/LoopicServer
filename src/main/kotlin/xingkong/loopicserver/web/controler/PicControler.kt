@@ -66,6 +66,12 @@ class PicControler : ApplicationRunner {
         return Mono.just(ConfigFileManager.getStoryList())
     }
 
+    @GetMapping(value = ["/story/scene/all"])
+    @ResponseBody
+    fun getAllSceneList(): Mono<List<List<String>>> {
+        return Mono.just(ConfigFileManager.getAllSceneList())
+    }
+
     @GetMapping(value = ["/scene/list/{story}"])
     @ResponseBody
     fun getSceneList(@PathVariable(value = "story") story: String): Mono<List<String>> {

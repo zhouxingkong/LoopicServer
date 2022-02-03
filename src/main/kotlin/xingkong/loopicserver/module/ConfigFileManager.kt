@@ -35,6 +35,10 @@ object ConfigFileManager {
         return storys.map { it.rootPath }
     }
 
+    fun getAllSceneList():List<List<String>>{
+        return storys.map { it.sceneList.map{it.rawTag} }
+    }
+
     fun getSceneList(storyId:Int):List<String>{
         return storys.getOrNull(storyId)?.sceneList?.map{it.rawTag} ?: listOf<String>()
     }
