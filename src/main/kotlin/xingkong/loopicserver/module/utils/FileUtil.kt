@@ -19,13 +19,21 @@ object FileUtil {
                 if (files[i].isDirectory) { // 判断是文件还是文件夹
                     val fileName = files[i].name
                     val newTags = files[i].name.split("-")
-                    tag.addAll(newTags)
-                    if(fileName.endsWith("story")){     //个体故事
-                        getListForSingleStory(files[i],files[i].name)
+                    newTags.forEach {
+                        if (tag.contains(it)) {
+                            println("BUG!!:${files[i].absolutePath}")
+                        }
                     }
-                    else{   //批量图
-                        getFileList(filelist, files[i].absolutePath,tag) // 获取文件绝对路径
-                        if(tag.isNotEmpty()) tag.removeAll(newTags)
+                    tag.addAll(newTags)
+                    if (fileName.endsWith("story")) {     //个体故事
+                        getListForSingleStory(files[i], files[i].name)
+                    } else {   //批量图
+                        getFileList(filelist, files[i].absolutePath, tag) // 获取文件绝对路径
+                        if (tag.isNotEmpty()) {
+                            newTags.forEach {
+                                tag.removeAt(tag.lastIndexOf(it))
+                            }
+                        }
                     }
                 } else {
                     filelist.add(TagedFile(files[i],tag))   //构造TagedFile时就加好了标签
