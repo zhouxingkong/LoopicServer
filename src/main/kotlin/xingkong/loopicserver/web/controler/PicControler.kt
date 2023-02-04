@@ -1,5 +1,6 @@
 package xingkong.loopicserver.web.controler
 
+import ch.qos.logback.core.util.FileUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseBody
 import reactor.core.publisher.Mono
 import xingkong.loopicserver.module.ConfigFileManager
 import xingkong.loopicserver.service.storage.StorageService
+import java.io.File
 
 @Controller
 class PicControler : ApplicationRunner {
@@ -58,6 +60,38 @@ class PicControler : ApplicationRunner {
         val file = resource.file
         return zeroCopyResponse.writeWith(file, 0, file.length())
 
+    }
+
+    @GetMapping(value = ["/rmpic/{story}/{scene}/{index}"])
+    @ResponseBody
+    fun rmPic(request: ServerHttpRequest, response: ServerHttpResponse,
+                @PathVariable(value = "story") story: String,
+                @PathVariable(value = "scene") scene: String,
+                @PathVariable(value = "index") index: String
+    ): Mono<String>? {
+        val path = ConfigFileManager.getPic(story.toInt(),scene.toInt(),index.toInt())
+        if (path.startsWith("error")) {
+            println(path)
+            return null
+        }
+        val sourceFile = File(path)
+        if(!sourceFile.exists()) return Mono.just("file not find")
+        val fileIndex = path.lastIndexOf("\\")
+        val dir = path.substring(0, fileIndex)
+        val filename = path.substring(fileIndex + 1)
+
+        val dstDir = File("${dir}${File.separator}rmpic")
+        if(!dstDir.exists()){
+            dstDir.mkdir()
+        }
+        val dstFile = File("${dstDir}${File.separator}${filename}")
+        try {
+            val ret = sourceFile.renameTo(dstFile)
+        }catch (e:Throwable){
+            return Mono.just("${e.message}")
+        }
+
+        return Mono.just("success")
     }
 
     @GetMapping(value = ["/story/list"])

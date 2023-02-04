@@ -1,27 +1,51 @@
 package xingkong.loopicserver.module.utils
 
 import xingkong.loopicserver.module.ConfigFileManager
+import xingkong.loopicserver.module.bean.SceneInfo
 import xingkong.loopicserver.module.bean.TagedFile
 import java.io.*
 
 object FileUtil {
 
-    fun getFileList(filelist: MutableList<TagedFile>, strPath: String,tag:MutableList<String> = mutableListOf()): List<TagedFile> {
+    fun getFileList(
+            filelist: MutableList<TagedFile>,
+            strPath: String,
+            tag:MutableList<String> = mutableListOf()
+    ): List<TagedFile> {
         val dir = File(strPath)
         val files = dir.listFiles() // 该文件目录下文件全部放入数组
         if (files != null) {
             for (i in files.indices) {
                 if (files[i].isDirectory) { // 判断是文件还是文件夹
+                    val fileName = files[i].name
                     val newTags = files[i].name.split("-")
                     tag.addAll(newTags)
-                    getFileList(filelist, files[i].absolutePath,tag) // 获取文件绝对路径
-                    if(tag.isNotEmpty()) tag.removeAll(newTags)
+                    if(fileName.endsWith("story")){     //个体故事
+                        getListForSingleStory(files[i],files[i].name)
+                    }
+                    else{   //批量图
+                        getFileList(filelist, files[i].absolutePath,tag) // 获取文件绝对路径
+                        if(tag.isNotEmpty()) tag.removeAll(newTags)
+                    }
                 } else {
                     filelist.add(TagedFile(files[i],tag))   //构造TagedFile时就加好了标签
                 }
             }
         }
         return filelist
+    }
+
+    fun getListForSingleStory(root:File,tag:String){
+        val pathList = root.listFiles().filter { it.isFile }.map { it.absolutePath }
+
+        val scene = SceneInfo().apply {
+            rawTag = tag
+            picTag = mutableListOf(tag)
+            soundTag = ""
+            text = ""
+            picPath = pathList
+        }
+        ConfigFileManager.singleStorys.add(scene)
     }
 
     fun getSuffix(filename: String): String {

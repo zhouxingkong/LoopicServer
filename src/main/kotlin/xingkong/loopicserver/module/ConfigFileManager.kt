@@ -22,6 +22,7 @@ object ConfigFileManager {
 
     internal lateinit var totalList: List<TagedFile>
     val storys = mutableListOf<StoryInfo>()
+    val singleStorys = mutableListOf<SceneInfo>()
 
     fun getPic(storyId:Int,sceneId:Int,ser:Int):String{
         val picList = storys.getOrNull(storyId)?.sceneList?.getOrNull(sceneId)?.picPath
@@ -111,12 +112,20 @@ object ConfigFileManager {
         if(file.exists()){
             storys.clear()
             file.listFiles()
-                .filter { it.isFile }.mapIndexed { index, file ->
+                .filter { it.isFile }.sortedBy { it.name }.mapIndexed { index, file ->
                     GlobalScope.launch(Dispatchers.IO) {
                         makeStoryInfo(index,file)
                     }
                 }
         }
+
+        //添加单体故事
+        val singleStory = StoryInfo().apply {
+            id = storys.size
+            rootPath = "D:/story/story.csv"
+            sceneList = singleStorys
+        }
+        storys.add(singleStory)
     }
 
     fun makeStoryInfo(index:Int,f:File){
@@ -146,6 +155,7 @@ object ConfigFileManager {
             }
 
             storys.add(storyInfo)
+            storys.sortBy { it.id }
 
             println("ready=${NetUtil.getIPAddress()}")
         }
@@ -185,10 +195,17 @@ object ConfigFileManager {
         if (nameSplitSpace.size < 2) return
         val sceneInfo = SceneInfo()
 
-        /*配图*/
-        sceneInfo.rawTag = nameSplitSpace[0]
-        sceneInfo.picTag.addAll(TagUtil.splitTag(nameSplitSpace[0]))
-        sceneInfo.picPath = TagManager.getFileListByTag(sceneInfo.picTag)
+
+        val tagType = nameSplitSpace[1]
+        if(tagType=="story"){  //单体故事
+
+        }
+        else{
+            /*配图*/
+            sceneInfo.rawTag = nameSplitSpace[0]
+            sceneInfo.picTag.addAll(TagUtil.splitTag(nameSplitSpace[0]))
+            sceneInfo.picPath = TagManager.getFileListByTag(sceneInfo.picTag)
+        }
 
         /*配音频*/
         if (nameSplitSpace.size > 2) {
