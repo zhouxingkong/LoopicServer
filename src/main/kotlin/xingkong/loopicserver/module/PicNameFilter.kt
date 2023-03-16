@@ -3,9 +3,7 @@ package xingkong.loopicserver.module
 
 import xingkong.loopicserver.module.bean.TagedFile
 import xingkong.loopicserver.module.match.MatchBase
-import xingkong.loopicserver.module.match.MatchFloorProperSubnorm
 import xingkong.loopicserver.module.match.MatchTable
-import java.util.*
 import java.util.stream.Collectors
 
 class PicNameFilter {
@@ -63,8 +61,9 @@ class PicNameFilter {
         judgeList.let{
             it.addAll(f.tags)
             it.retainAll(excl)
-            it.removeAll(inputTag)
-            if(it.isNotEmpty()) return false
+            val filteredInput = inputTag.flatMap { it.split("|").toList() }
+            it.removeAll(filteredInput)
+            if (it.isNotEmpty()) return false
         }
 
         //判断匹配标签
